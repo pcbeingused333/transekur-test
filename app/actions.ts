@@ -54,6 +54,26 @@ export async function createService(form: FormData) {
   redirect("/dispatch?created=1");
 }
 
+// Demo helper: recreates the example services for today, so the driver view is
+// never empty for whoever tests this days later. Only touches "(demo)" rows.
+export async function resetDemoServices() {
+  await requireUser("dispatch");
+  await sql.begin(async (tx) => {
+    await tx`delete from services where client_name like '% (demo)'`; // notices go with them (on delete cascade)
+    await tx`
+      insert into services (client_name, client_phone, pickup_at, pickup_point, driver_id)
+      select v.client, v.phone, ((now() at time zone ${TZ})::date + v.t::time) at time zone ${TZ}, v.pickup,
+             (select id from users where email = v.driver)
+      from (values
+        ('Laura Gómez (demo)',  '+1 809 555 0101', '14:30', 'Aeropuerto Punta Cana, terminal B', 'carlos@transekur.test'),
+        ('John Smith (demo)',   '+1 829 555 0102', '17:00', 'Hotel Demo, Bávaro',                'carlos@transekur.test'),
+        ('Ana Martínez (demo)', '+1 849 555 0103', '15:15', 'Aeropuerto Las Américas',           'maria@transekur.test')
+      ) as v(client, phone, t, pickup, driver)`;
+  });
+  revalidatePath("/dispatch");
+  redirect("/dispatch?reset=1");
+}
+
 export async function notifyTenMinutes(form: FormData) {
   const driver = await requireUser("driver");
   const serviceId = Number(form.get("serviceId"));

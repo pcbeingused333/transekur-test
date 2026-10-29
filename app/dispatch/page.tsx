@@ -2,7 +2,7 @@ import AutoRefresh from "@/components/AutoRefresh";
 import { requireUser } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { fmtDateTime, fmtTime, whatsappLink } from "@/lib/format";
-import { createService, logout } from "../actions";
+import { createService, logout, resetDemoServices } from "../actions";
 
 type Row = {
   id: number;
@@ -21,10 +21,10 @@ const input = "rounded border px-3 py-2 text-base";
 export default async function DispatchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; created?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; reset?: string }>;
 }) {
   const user = await requireUser("dispatch");
-  const { error, created } = await searchParams;
+  const { error, created, reset } = await searchParams;
 
   const drivers = await sql<{ id: number; name: string; vehicle: string }[]>`
     select id, name, vehicle from users where role = 'driver' order by name`;
@@ -83,7 +83,13 @@ export default async function DispatchPage({
       </section>
 
       <section>
-        <h2 className="mb-3 font-medium">Servicios</h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-medium">Servicios</h2>
+          <form action={resetDemoServices}>
+            <button className="rounded border px-3 py-1.5 text-sm">Cargar servicios de ejemplo para hoy</button>
+          </form>
+        </div>
+        {reset && <p role="status" className="mb-3 text-sm text-green-700">Servicios de ejemplo recreados para hoy.</p>}
         {services.length === 0 ? (
           <p className="text-sm text-neutral-600">Todavía no hay servicios.</p>
         ) : (
