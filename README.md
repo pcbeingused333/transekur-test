@@ -71,6 +71,10 @@ npm run dev
 
 `tests/e2e.py` (Python stdlib, no browser) exercises the real forms of a running instance: 35 checks covering login, per-driver visibility, forged requests, double tap, time zone, input validation and the demo reset. It passed against the deployed version too. It does not check how the pages look; I checked that by hand on a phone.
 
+## License
+
+MIT, see [LICENSE](LICENSE).
+
 ## Questions I would ask Transekur
 
 Should dispatch also be able to send the notice manually? Fixed message template and languages? Can "10 min" be repeated if the driver is late? Does the driver app need to work with a poor connection? Which channel by default, and what fallback if the client has no WhatsApp?
